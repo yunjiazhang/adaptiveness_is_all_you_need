@@ -54,14 +54,15 @@ def _SetGeneticOptimizer(flag, cursor):
 
 
 def DropBufferCache():
-    # WARNING: no effect if PG is running on another machine
-    subprocess.check_output(['free', '&&', 'sync'])
-    subprocess.check_output(
-        ['sudo', 'sh', '-c', 'echo 3 > /proc/sys/vm/drop_caches'])
-    subprocess.check_output(['free'])
+#     # WARNING: no effect if PG is running on another machine
+#     subprocess.check_output(['free', '&&', 'sync'])
+#     subprocess.check_output(
+#         ['sudo', 'sh', '-c', 'echo 3 > /proc/sys/vm/drop_caches'])
+#     subprocess.check_output(['free'])
 
-    with pg_executor.Cursor() as cursor:
-        cursor.execute('DISCARD ALL;')
+#     with pg_executor.Cursor() as cursor:
+#         cursor.execute('DISCARD ALL;')
+    pass
 
 
 def ExplainAnalyzeSql(sql,

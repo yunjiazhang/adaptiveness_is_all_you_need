@@ -1,17 +1,16 @@
 SELECT COUNT(*)
 FROM comments AS c,
      posts AS p,
+     votes AS v,
      users AS u
-WHERE c.UserId = u.Id
+WHERE u.Id = c.UserId
   AND u.Id = p.OwnerUserId
+  AND u.Id = v.UserId
   AND c.Score=0
-  AND p.Score>=0
-  AND p.Score<=15
-  AND p.ViewCount>=0
-  AND p.ViewCount<=3002
-  AND p.AnswerCount<=3
-  AND p.CommentCount<=10
-  AND u.DownVotes<=0
+  AND c.CreationDate<='2014-09-13 20:12:15'::timestamp
+  AND p.CreationDate>='2010-07-27 01:51:15'::timestamp
+  AND v.BountyAmount<=50
+  AND v.CreationDate<='2014-09-12 00:00:00'::timestamp
   AND u.UpVotes>=0
-  AND u.CreationDate>='2010-08-23 16:21:10'::timestamp
-  AND u.CreationDate<='2014-09-02 09:50:06'::timestamp;
+  AND u.UpVotes<=12
+  AND u.CreationDate>='2010-07-19 19:09:39'::timestamp;

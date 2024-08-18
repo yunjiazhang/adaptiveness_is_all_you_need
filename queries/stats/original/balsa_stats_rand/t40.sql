@@ -1,17 +1,16 @@
 SELECT COUNT(*)
-FROM comments AS c,
+FROM postLinks AS pl,
      posts AS p,
-     users AS u
-WHERE c.UserId = u.Id
+     users AS u,
+     badges AS b
+WHERE p.Id = pl.RelatedPostId
   AND u.Id = p.OwnerUserId
-  AND c.Score=0
-  AND p.Score>=0
-  AND p.Score<=15
-  AND p.ViewCount>=0
-  AND p.ViewCount<=3002
-  AND p.AnswerCount<=3
-  AND p.CommentCount<=10
-  AND u.DownVotes<=0
-  AND u.UpVotes>=0
-  AND u.CreationDate>='2010-08-23 16:21:10'::timestamp
-  AND u.CreationDate<='2014-09-02 09:50:06'::timestamp;
+  AND u.Id = b.UserId
+  AND pl.LinkTypeId=1
+  AND p.Score>=-1
+  AND p.CommentCount<=8
+  AND p.CreationDate>='2010-07-21 12:30:43'::timestamp
+  AND p.CreationDate<='2014-09-07 01:11:03'::timestamp
+  AND u.Views<=40
+  AND u.CreationDate>='2010-07-26 19:11:25'::timestamp
+  AND u.CreationDate<='2014-09-11 22:26:42'::timestamp;

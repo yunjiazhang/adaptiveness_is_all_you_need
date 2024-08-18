@@ -1,17 +1,24 @@
 SELECT COUNT(*)
-FROM comments AS c,
+FROM postHistory AS ph,
      posts AS p,
-     users AS u
-WHERE c.UserId = u.Id
-  AND u.Id = p.OwnerUserId
-  AND c.Score=0
-  AND p.Score>=0
-  AND p.Score<=15
+     users AS u,
+     badges AS b
+WHERE u.Id = p.OwnerUserId
+  AND p.OwnerUserId = ph.UserId
+  AND ph.UserId = b.UserId
+  AND ph.CreationDate>='2010-09-06 11:41:43'::timestamp
+  AND ph.CreationDate<='2014-09-03 16:41:18'::timestamp
+  AND p.Score>=-1
   AND p.ViewCount>=0
-  AND p.ViewCount<=3002
-  AND p.AnswerCount<=3
-  AND p.CommentCount<=10
+  AND p.ViewCount<=39097
+  AND p.AnswerCount>=0
+  AND p.CommentCount>=0
+  AND p.CommentCount<=11
+  AND p.FavoriteCount<=10
+  AND p.CreationDate>='2010-08-13 02:18:09'::timestamp
+  AND p.CreationDate<='2014-09-09 10:20:27'::timestamp
+  AND u.Views>=0
+  AND u.DownVotes>=0
   AND u.DownVotes<=0
   AND u.UpVotes>=0
-  AND u.CreationDate>='2010-08-23 16:21:10'::timestamp
-  AND u.CreationDate<='2014-09-02 09:50:06'::timestamp;
+  AND u.UpVotes<=37;

@@ -1,17 +1,16 @@
 SELECT COUNT(*)
-FROM comments AS c,
+FROM postHistory AS ph,
      posts AS p,
+     votes AS v,
      users AS u
-WHERE c.UserId = u.Id
-  AND u.Id = p.OwnerUserId
-  AND c.Score=0
-  AND p.Score>=0
-  AND p.Score<=15
-  AND p.ViewCount>=0
-  AND p.ViewCount<=3002
-  AND p.AnswerCount<=3
-  AND p.CommentCount<=10
-  AND u.DownVotes<=0
-  AND u.UpVotes>=0
-  AND u.CreationDate>='2010-08-23 16:21:10'::timestamp
-  AND u.CreationDate<='2014-09-02 09:50:06'::timestamp;
+WHERE u.Id = p.OwnerUserId
+  AND p.Id = ph.PostId
+  AND p.Id = v.PostId
+  AND ph.CreationDate<='2014-07-28 13:25:35'::timestamp
+  AND p.PostTypeId=1
+  AND p.AnswerCount>=0
+  AND p.AnswerCount<=4
+  AND v.CreationDate>='2010-07-20 00:00:00'::timestamp
+  AND v.CreationDate<='2014-09-03 00:00:00'::timestamp
+  AND u.DownVotes=0
+  AND u.CreationDate<='2014-08-08 07:03:29'::timestamp;

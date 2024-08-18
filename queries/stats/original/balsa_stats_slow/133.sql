@@ -1,20 +1,19 @@
 SELECT COUNT(*)
 FROM comments AS c,
-     posts AS p,
-     votes AS v,
+     postHistory AS ph,
      badges AS b,
+     votes AS v,
      users AS u
-WHERE u.Id =c.UserId
-  AND c.UserId = p.OwnerUserId
-  AND p.OwnerUserId = v.UserId
-  AND v.UserId = b.UserId
-  AND c.Score=1
-  AND p.Score>=-1
-  AND p.Score<=29
-  AND p.CreationDate>='2010-07-19 20:40:36'::timestamp
-  AND p.CreationDate<='2014-09-10 20:52:30'::timestamp
-  AND v.BountyAmount<=50
-  AND b.Date<='2014-08-25 19:05:46'::timestamp
-  AND u.DownVotes<=11
-  AND u.CreationDate>='2010-07-31 17:32:56'::timestamp
-  AND u.CreationDate<='2014-09-07 16:06:26'::timestamp;
+WHERE ph.UserId = u.Id
+  AND v.UserId = u.Id
+  AND c.UserId = u.Id
+  AND b.UserId = u.Id
+  AND b.Date>='2010-09-26 12:17:14'::timestamp
+  AND v.BountyAmount>=0
+  AND v.CreationDate>='2010-07-20 00:00:00'::timestamp
+  AND v.CreationDate<='2014-09-11 00:00:00'::timestamp
+  AND u.DownVotes>=0
+  AND u.DownVotes<=0
+  AND u.UpVotes>=0
+  AND u.UpVotes<=31
+  AND u.CreationDate<='2014-08-06 20:38:52'::timestamp;

@@ -70,7 +70,9 @@ import experiments  # noqa # pylint: disable=unused-import
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('run', 'Balsa_JOBRandSplit', 'Experiment config to run.')
-flags.DEFINE_boolean('local', False,
+flags.DEFINE_string('wandb_name', 'default_balsa_project',
+                     'Define the wandb project name.')
+flags.DEFINE_boolean('local', True,
                      'Whether to use local engine for query execution.')
 
 
@@ -785,12 +787,14 @@ class BalsaAgent(object):
 
     def _InitLogging(self):
         p = self.params
+        
         self.loggers = [
             pl_loggers.TensorBoardLogger(save_dir=os.getcwd(),
                                          version=None,
                                          name='tensorboard_logs'),
-            pl_loggers.WandbLogger(save_dir=os.getcwd(), project='balsa'),
+            pl_loggers.WandbLogger(name=p.wandb_name, save_dir=os.getcwd(), project='balsa'),
         ]
+        
         self.summary_writer = SummaryWriter()
         self.wandb_logger = self.loggers[-1]
         p_dict = balsa.utils.SanitizeToText(dict(p))
@@ -2135,10 +2139,15 @@ class BalsaAgent(object):
 def Main(argv):
     del argv  # Unused.
     name = FLAGS.run
+    
+    if FLAGS.wandb_name == "default_balsa_project":
+        FLAGS.wandb_name = FLAGS.run
+        
     print('Looking up params by name:', name)
     p = balsa.params_registry.Get(name)
 
     p.use_local_execution = FLAGS.local
+    p.wandb_name = FLAGS.wandb_name
     # Override params here for quick debugging.
     # p.sim_checkpoint = None
     # p.epochs = 1

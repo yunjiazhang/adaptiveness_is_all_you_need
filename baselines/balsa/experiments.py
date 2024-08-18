@@ -91,9 +91,15 @@ class BalsaParams(object):
         p.Define('cost_model', 'postgrescost',
                  'A choice of postgrescost, mincardcost.')
         p.Define('bushy', True, 'Plans bushy query execution plans.')
+        
+        # p.Define('search_space_join_ops',
+        #          ['Hash Join', 'Merge Join', 'Nested Loop'],
+        #          'Action space: join operators to learn and use.')
         p.Define('search_space_join_ops',
-                 ['Hash Join', 'Merge Join', 'Nested Loop'],
+                 ['Hash Join', 'Nested Loop'],
                  'Action space: join operators to learn and use.')
+        
+        
         p.Define('search_space_scan_ops',
                  ['Index Scan', 'Index Only Scan', 'Seq Scan'],
                  'Action space: scan operators to learn and use.')
@@ -325,6 +331,8 @@ class BalsaParams(object):
                  ' cluster?  Non-execution EXPLAINs are always issued to'\
                  ' local.')
         p.Define('use_cache', True, 'Skip executing seen plans?')
+        
+        p.Define('wandb_name', 'default_balsa_project', 'Define the name displays on wandb')
         return p
 
 
@@ -349,7 +357,6 @@ class BaselineExtJOB(Baseline):
         p.query_dir = 'queries/join-order-benchmark-extended'
         p.test_query_glob = ['e*.sql']
         return p
-
 
 ########################## Main Balsa agents ##########################
 
@@ -566,6 +573,57 @@ class Balsa8x_TrainJOB_TestExtJOB(Balsa1x_TrainJOB_TestExtJOB):
         p.prev_replay_buffers_glob_val = './replays/EXTJOB/val/*pkl'
         return p
 
+    
+########################## Stats configs ##########################
+@balsa.params_registry.Register
+class BaselineStats(Baseline):
+
+    def Params(self):
+        p = super().Params()
+        p.sim_checkpoint = None
+        p.agent_checkpoint = None
+        p.query_dir = '/mnt/workspace/adaptiveness_vs_learning/queries/stats/original/all/'
+        p.query_glob = ['*.sql']
+        p.test_query_glob = ['t*.sql']
+        p.epochs = 50
+        return p
+
+@balsa.params_registry.Register
+class Balsa_StatsRandSplit(Balsa_JOBRandSplit):
+
+    def Params(self):
+        p = super().Params()
+        p.sim_checkpoint = None
+        p.agent_checkpoint = None
+        p.initial_timeout_ms = 3600000
+        p.query_dir = '/mnt/workspace/adaptiveness_vs_learning/queries/stats/original/balsa_stats_rand/'
+        p.query_glob = ['*.sql']
+        p.test_query_glob = ['t*.sql']
+        p.epochs = 50
+        p.skip_training_on_expert = False
+        p.sim = True
+        return p
+    
+@balsa.params_registry.Register
+class Balsa_StatsSlowSplit(Balsa_JOBSlowSplit):
+
+    def Params(self):
+        p = super().Params()
+        p.sim_checkpoint = None
+        p.agent_checkpoint = None
+        p.initial_timeout_ms = 3600000
+        p.query_dir = '/mnt/workspace/adaptiveness_vs_learning/queries/stats/original/balsa_stats_slow/'
+        p.query_glob = ['*.sql']
+        p.test_query_glob = ['t*.sql']
+        p.epochs = 50
+        p.skip_training_on_expert = False
+        p.sim = True
+        return p
+
+########################## Stats configs ##########################
+
+    
+    
 
 ########################## Neo-impl experiments ##########################
 
