@@ -26,6 +26,7 @@ import ray
 
 # JOB/IMDB.
 # LOCAL_DSN = "postgres://psycopg:psycopg@localhost/imdb"
+
 # LOCAL_DSN = "host=/tmp dbname=imdbload"
 # REMOTE_DSN = "postgres://psycopg:psycopg@localhost/imdbload"
 
@@ -123,7 +124,7 @@ def Execute(sql, verbose=False, geqo_off=False, timeout_ms=None, cursor=None):
       A pg_executor.Result.
     """
     if verbose:
-        print(sql)
+        print("PG executing: ", sql)
 
     _SetGeneticOptimizer('off' if geqo_off else 'on', cursor)
     if timeout_ms is not None:

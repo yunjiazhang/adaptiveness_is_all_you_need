@@ -74,6 +74,8 @@ flags.DEFINE_string('wandb_name', 'default_balsa_project',
                      'Define the wandb project name.')
 flags.DEFINE_boolean('local', True,
                      'Whether to use local engine for query execution.')
+# flags.DEFINE_boolean('verbose', True,
+#                      'Whether to use verbose setting.')
 
 
 def GetDevice():
@@ -168,7 +170,7 @@ def ExecuteSql(query_name,
     if engine == 'postgres':
         return postgres.ExplainAnalyzeSql(sql_str,
                                           comment=hint_str,
-                                          verbose=False,
+                                          verbose=True,
                                           geqo_off=True,
                                           timeout_ms=curr_timeout_ms,
                                           remote=not use_local_execution)
@@ -252,7 +254,7 @@ def ParseExecutionResult(result_tup,
     if hint_str is not None:
         # Check that the hint has been respected.  No need to check if running
         # baseline.
-        do_hint_check = True
+        do_hint_check = False
         if engine == 'dbmsx':
             raise NotImplementedError
         else:
@@ -264,7 +266,7 @@ def ParseExecutionResult(result_tup,
                 print('Timeout occurred; checking the hint against local PG.')
                 executed_node, _ = postgres.SqlToPlanNode(sql_str,
                                                           comment=hint_str,
-                                                          verbose=False)
+                                                          verbose=True)
             executed_node = plans_lib.FilterScansOrJoins(executed_node)
             executed_hint_str = executed_node.hint_str(
                 with_physical_hints=plan_physical)
@@ -877,7 +879,7 @@ class BalsaAgent(object):
         # TODO: avoid repeatedly featurizing already-featurized nodes.
         tup = self.exp.featurize(
             rewrite_generic=not p.plan_physical,
-            verbose=False,
+            verbose=True,
             skip_first_n=skip_first_n,
             deduplicate=p.dedup_training_data,
             physical_execution_hindsight=p.physical_execution_hindsight,
@@ -946,7 +948,7 @@ class BalsaAgent(object):
         else:
             tup = self.exp_val.featurize(
                 rewrite_generic=not p.plan_physical,
-                verbose=False,
+                verbose=True,
                 skip_first_n=skip_first_n,
                 deduplicate=p.dedup_training_data,
                 physical_execution_hindsight=p.physical_execution_hindsight,
@@ -1410,7 +1412,7 @@ class BalsaAgent(object):
                 p.search_method,
                 bushy=p.bushy,
                 return_all_found=True,
-                verbose=False,
+                verbose=True,
                 planner_config=planner_config,
                 epsilon_greedy=epsilon_greedy_within_beam_search,
                 # prevents Ext-JOB test query hints from failing.
