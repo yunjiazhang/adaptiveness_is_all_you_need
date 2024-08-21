@@ -1,3 +1,8 @@
+/*+
+NestLoop(u b v)
+NestLoop(u b)
+Leading(((u b) v))
+*/
 SELECT COUNT(*)
 FROM votes AS v,
      badges AS b,

@@ -1,3 +1,4 @@
+-- nothing to do with this query
 SELECT COUNT(*)
 FROM votes AS v,
      posts AS p,

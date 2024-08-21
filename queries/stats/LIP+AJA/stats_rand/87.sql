@@ -1,3 +1,8 @@
+/*+
+HashJoin(c u b)
+NestLoop(u b)
+Leading((c (u b)))
+*/
 SELECT COUNT(*)
 FROM comments AS c,
      badges AS b,

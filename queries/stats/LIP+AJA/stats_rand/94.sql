@@ -1,3 +1,9 @@
+
+/*+
+HashJoin(u p v)
+NestLoop(u p)
+Leading((v (u p)))
+*/
 SELECT COUNT(*)
 FROM votes AS v,
      posts AS p,

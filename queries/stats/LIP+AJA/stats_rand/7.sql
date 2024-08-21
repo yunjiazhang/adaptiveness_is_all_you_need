@@ -1,3 +1,8 @@
+/*+
+NestLoop(p pl c)
+NestLoop(p pl)
+Leading(((p pl) c))
+*/
 SELECT COUNT(*)
 FROM comments AS c,
      posts AS p,

@@ -1,3 +1,14 @@
+SELECT pg_lip_bloom_set_dynamic(2);
+SELECT pg_lip_bloom_init(1);
+
+/*+
+HashJoin(ph u c b)
+NestLoop(ph u)
+NestLoop(c b)
+IndexScan(b)
+IndexScan(u)
+Leading(((c b) (ph u)))
+*/
 SELECT COUNT(*)
 FROM comments AS c,
      postHistory AS ph,

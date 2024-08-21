@@ -1,3 +1,4 @@
+-- nothing to do
 SELECT COUNT(*)
 FROM comments AS c,
      posts AS p,

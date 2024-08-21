@@ -1,6 +1,31 @@
+SELECT pg_lip_bloom_set_dynamic(2);
+SELECT pg_lip_bloom_init(2);
+
+SELECT sum(pg_lip_bloom_add(0, ph.PostId)) FROM postHistory AS ph WHERE TRUE
+  AND ph.CreationDate<='2014-09-11 20:09:41'::timestamp;
+SELECT sum(pg_lip_bloom_add(1, v.PostId)) FROM votes AS v WHERE TRUE
+  AND v.CreationDate>='2010-07-21 00:00:00'::timestamp
+  AND v.CreationDate<='2014-09-14 00:00:00'::timestamp;
+
+
+/*+
+HashJoin(b c pl p u v ph)
+NestLoop(c pl p u v ph)
+NestLoop(c pl p u v)
+NestLoop(c pl p u)
+HashJoin(c pl p)
+HashJoin(pl p)
+Leading((b ((((c (pl p)) u) v) ph)))
+*/
 SELECT COUNT(*)
 FROM comments AS c,
-     posts AS p,
+     (
+         select * 
+         from posts AS p
+         where TRUE 
+         -- AND pg_lip_bloom_probe(0, p.Id)
+         -- AND pg_lip_bloom_probe(1, p.Id)
+     ) AS p,
      postLinks AS pl,
      postHistory AS ph,
      votes AS v,

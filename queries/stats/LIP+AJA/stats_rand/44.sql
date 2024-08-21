@@ -1,3 +1,14 @@
+SELECT pg_lip_bloom_set_dynamic(2);
+SELECT pg_lip_bloom_init(1);
+SELECT sum(pg_lip_bloom_add(0, ph.PostId)) FROM postHistory AS ph WHERE ph.CreationDate>='2010-09-06 11:41:43'::timestamp
+  AND ph.CreationDate<='2014-09-03 16:41:18'::timestamp;
+
+/*+
+HashJoin(u p b ph)
+HashJoin(u p b)
+NestLoop(u p)
+Leading((ph ((u p) b)))
+*/
 SELECT COUNT(*)
 FROM postHistory AS ph,
      posts AS p,

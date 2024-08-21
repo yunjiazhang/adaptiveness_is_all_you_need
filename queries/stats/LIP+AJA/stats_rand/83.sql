@@ -1,3 +1,9 @@
+
+/*+
+HashJoin(c u ph)
+NestLoop(u ph)
+Leading((c (u ph)))
+*/
 SELECT COUNT(*)
 FROM comments AS c,
      postHistory AS ph,

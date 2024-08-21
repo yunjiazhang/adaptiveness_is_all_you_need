@@ -1,5 +1,22 @@
+SELECT pg_lip_bloom_set_dynamic(2);
+SELECT pg_lip_bloom_init(1);
+SELECT sum(pg_lip_bloom_add(0, v.PostId)) FROM votes AS v WHERE v.CreationDate<='2014-09-12 00:00:00'::timestamp;
+  
+
+/*+
+HashJoin(c p u v)
+HashJoin(c p u)
+HashJoin(c p)
+Leading((v ((c p) u)))
+*/
 SELECT COUNT(*)
-FROM comments AS c,
+FROM 
+(
+    select * 
+    from comments AS c
+    where pg_lip_bloom_probe(0, c.PostId)
+    
+) as c,
      posts AS p,
      votes AS v,
      users AS u

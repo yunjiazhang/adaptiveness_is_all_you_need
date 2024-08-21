@@ -1,3 +1,8 @@
+/*+
+NestLoop(t p v)
+NestLoop(t p)
+Leading(((t p) v))
+*/
 SELECT COUNT(*)
 FROM posts AS p,
      tags AS t,
