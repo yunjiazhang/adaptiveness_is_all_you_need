@@ -4,6 +4,5 @@ FROM votes AS v,
      users AS u
 WHERE v.UserId = u.Id
   AND p.OwnerUserId = u.Id
-  AND p.PostTypeId=2
-  AND p.CreationDate<='2014-08-26 22:40:26'::timestamp
-  AND u.Views>=0;
+  AND p.CommentCount>=0
+  AND u.CreationDate>='2010-12-15 06:00:24'::timestamp;
