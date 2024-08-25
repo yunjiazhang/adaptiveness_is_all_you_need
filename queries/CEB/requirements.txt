@@ -1,0 +1,13 @@
+numpy
+pandas
+networkx
+sqlparse
+psycopg2-binary
+matplotlib
+grandalf
+xgboost
+scikit-learn
+torch
+pygtrie
+wandb
+seaborn
