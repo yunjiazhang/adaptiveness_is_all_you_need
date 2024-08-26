@@ -17,41 +17,42 @@ set -ex
 
 DATA_DIR=$1
 DBNAME=${2:-imdbload}
+PORT=${3:-5432}
 
-dropdb $DBNAME
-createdb $DBNAME
+dropdb -p $PORT $DBNAME
+createdb -p $PORT $DBNAME
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-psql $DBNAME -f "$DIR/schema.sql"
-psql $DBNAME -f "$DIR/fkindices.sql"
+psql -p $PORT $DBNAME -f "$DIR/schema.sql"
+psql -p $PORT $DBNAME -f "$DIR/fkindices.sql"
 
 pushd $DATA_DIR
-psql $DBNAME -c "\copy name from '$1/name.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy char_name from '$1/char_name.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy comp_cast_type from '$1/comp_cast_type.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy company_name from '$1/company_name.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy company_type from '$1/company_type.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy info_type from '$1/info_type.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy keyword from '$1/keyword.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy kind_type from '$1/kind_type.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy link_type from '$1/link_type.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy role_type from '$1/role_type.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy title from '$1/title.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy aka_name from '$1/aka_name.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy aka_title from '$1/aka_title.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy cast_info from '$1/cast_info.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy complete_cast from '$1/complete_cast.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy movie_companies from '$1/movie_companies.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy movie_info from '$1/movie_info.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy movie_info_idx from '$1/movie_info_idx.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy movie_keyword from '$1/movie_keyword.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy movie_link from '$1/movie_link.csv' escape '\' csv header" &
-psql $DBNAME -c "\copy person_info from '$1/person_info.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy name from '$1/name.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy char_name from '$1/char_name.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy comp_cast_type from '$1/comp_cast_type.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy company_name from '$1/company_name.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy company_type from '$1/company_type.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy info_type from '$1/info_type.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy keyword from '$1/keyword.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy kind_type from '$1/kind_type.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy link_type from '$1/link_type.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy role_type from '$1/role_type.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy title from '$1/title.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy aka_name from '$1/aka_name.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy aka_title from '$1/aka_title.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy cast_info from '$1/cast_info.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy complete_cast from '$1/complete_cast.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy movie_companies from '$1/movie_companies.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy movie_info from '$1/movie_info.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy movie_info_idx from '$1/movie_info_idx.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy movie_keyword from '$1/movie_keyword.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy movie_link from '$1/movie_link.csv' escape '\' csv header" &
+psql -p $PORT $DBNAME -c "\copy person_info from '$1/person_info.csv' escape '\' csv header" &
 wait
 popd
 
 # Declare FK constraints.
-psql $DBNAME -f "$DIR/add_fks.sql"
+psql -p $PORT $DBNAME -f "$DIR/add_fks.sql"
 
 # Create histograms.
-psql $DBNAME -c "ANALYZE VERBOSE;"
+psql -p $PORT $DBNAME -c "ANALYZE VERBOSE;"
