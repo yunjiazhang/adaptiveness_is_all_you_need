@@ -41,6 +41,30 @@ class PostgresQueryEvaluator:
         if self.conn:
             self.conn.close()
             print("Database connection closed.")
+    
+    def execute_query(self, query, return_results=True):
+        """Executes the given query and returns the results."""
+        try:
+            self.cursor.execute(query)
+            self.conn.commit()
+            if return_results:
+                return self.cursor.fetchall()
+        except Exception as e:
+            print(f"Error executing query: {e}")
+            self.conn.rollback()
+
+    def explain_query(self, query, execute=True):
+        try:
+            # explain and return json
+            if execute:
+                sql_string = sql.SQL("EXPLAIN (ANALYZE, COSTS, VERBOSE, BUFFERS, FORMAT JSON) {}").format(sql.SQL(query))
+            else:
+                sql_string = sql.SQL("EXPLAIN (COSTS, VERBOSE, FORMAT JSON) {}").format(sql.SQL(query))
+            self.cursor.execute(sql_string)
+            return self.cursor.fetchall()
+        except Exception as e:
+            print(f"Error explaining query: {e}")
+            self.conn.rollback()
 
     def evaluate_queries(
                 self,

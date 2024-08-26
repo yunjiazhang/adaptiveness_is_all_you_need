@@ -12,7 +12,7 @@ import psycopg2
 from psycopg2 import sql
 from tqdm import tqdm
 
-class QueryEvaluator:
+class PostgresQueryEvaluator:
     def __init__(self, db_config, query_directory):
         """
         Initializes the QueryEvaluator with database configuration and the directory containing the queries.
@@ -111,5 +111,5 @@ db_config = {
 
 query_directory = './all/'
 
-evaluator = QueryEvaluator(db_config, query_directory)
+evaluator = PostgresQueryEvaluator(db_config, query_directory)
 evaluator.run()

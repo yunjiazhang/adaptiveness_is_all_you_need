@@ -1,35 +1,43 @@
-PATH = '/mnt/pg_lip_bloom/runtime_eval/'
+PATH = '/u/y/u/yunjia/nobackup/yunjia/adaptiveness_vs_learning/runtime_eval'
 import sys
 sys.path.append(PATH)
-from core.cardinality_estimation_quality.cardinality_estimation_quality import *
+from core.QueryEvaluator import PostgresQueryEvaluator
+
 from treelib import Node, Tree
 from tqdm import tqdm
 import numpy as np
 import re
+import psycopg2
 
 LIP_OPTIMIZATION_SEL_THRESHOLD = 0.05
 LIP_OPTIMIZATION_SEL_THRESHOLD_FACT = 0.0001
 LIP_OPTIMIZATION_SEL_THRESHOLD_DIM = 0.05
 INDEX_AVAILABILITY = {}
 
-class PostgreConnector:
+class PostgresConnector:
 
-    def __init__(self,):
-        server='localhost' 
-        username='postgres'
-        password='postgres'
-        # db_name='stack'
-        db_name='imdbload'
+    def __init__(
+            self, 
+            port=5433
+        ):
 
-        self.db_url = f"host={server} port=5432 user={username} dbname={db_name} password={password} options='-c statement_timeout={6000000}' "
-        db = self.db_url.format(db_name)
-        self.PG = Postgres(db)
+        db_config = {
+            'dbname': 'imdbload',
+            'user': 'yunjia',
+            'password': 'yunjia',
+            'host': 'localhost',
+            'port': '5433'
+        }
+
+        self.PG = PostgresQueryEvaluator(db_config, None)
+        self.PG.connect_to_db()
         self.parse_index_availability()
 
-    def get_plan(self, sql_str, execute=False):
+    def get_plan(self, sql_str, execute=True):
         # assert 'explain' not in sql_str.lower()
         # print(sql_str)
-        return self.PG.explain(sql_str, execute=execute)[0][0][0]["Plan"]
+        result = self.PG.explain_query(sql_str, execute=execute)
+        return result[0][0][0]["Plan"]
 
     def get_cardinality(self, sql_str):
         plan = self.get_plan(sql_str)
@@ -48,12 +56,13 @@ class PostgreConnector:
             tablename,
             indexname;
         """
-        conn = psycopg2.connect(self.db_url)
-        conn.set_client_encoding('UTF8')
-        cur = conn.cursor()
-        cur.execute(sql)
-        index_defs = cur.fetchall()
-        conn.close()
+        # conn = psycopg2.connect(self.db_url)
+        # conn.set_client_encoding('UTF8')
+        # cur = conn.cursor()
+        # cur.execute(sql)
+        # index_defs = cur.fetchall()
+        # conn.close()
+        index_defs = self.PG.execute_query(sql)
         for index in index_defs:
             table = index[0]
             on_attrs = index[1].split('(')[1].split(')')[0].split(',')
@@ -381,7 +390,7 @@ f"""(
 def LIP_AJA_rewrite(sql, lip_opt=True, aja_opt=True, evaluate=False):
     test_query = normalize_sql(sql)
 
-    conn = PostgreConnector()
+    conn = PostgresConnector()
     plan_dict = conn.get_plan(test_query, aja_opt)
     plan_tree, predicate_nodes, table_depth = form_plan_tree(plan_dict)
     LIP_filters = construct_lip_filters(predicate_nodes)
@@ -400,17 +409,19 @@ def LIP_AJA_rewrite(sql, lip_opt=True, aja_opt=True, evaluate=False):
 if __name__ == "__main__":
 
     import os
-    queries_dir = '/mnt/pg_lip_bloom/queries/job/'
-    
+    queries_dir = '/u/y/u/yunjia/nobackup/yunjia/adaptiveness_vs_learning/queries/ceb-imdb/LIP+AJA/ceb-imdb-rand/'
     all_files = sorted([s for s in os.listdir(queries_dir) if '.sql' in s])
-    
+    DEBUG = True
     os.system(f"mkdir {os.path.join(queries_dir, 'lip_aja_auto_rewrite/')}")
     for sql_file in tqdm(all_files):
         print(sql_file)
         with open(os.path.join(queries_dir, sql_file), encoding='utf8') as f, open(os.path.join(queries_dir, 'lip_aja_auto_rewrite', sql_file), 'w') as g:
             sql_str = f.read()
+            if DEBUG:
+                print("Original SQL: ", sql_str)
             rewriten = LIP_AJA_rewrite(sql_str, True, True,)
-            # print(rewriten)
+            if DEBUG:
+                print("Rewriten SQL: ", rewriten)
             g.write(rewriten)
         # break
 
