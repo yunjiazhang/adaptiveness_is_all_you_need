@@ -1,0 +1,24 @@
+[2024-08-19 00:41:21,457 I 845526 845526] io_service_pool.cc:35: IOServicePool is running with 1 io_service.
+[2024-08-19 00:41:21,459 I 845526 845526] gcs_redis_failure_detector.cc:30: Starting redis failure detector.
+[2024-08-19 00:41:21,459 I 845526 845526] gcs_init_data.cc:42: Loading job table data.
+[2024-08-19 00:41:21,460 I 845526 845526] gcs_init_data.cc:54: Loading node table data.
+[2024-08-19 00:41:21,460 I 845526 845526] gcs_init_data.cc:66: Loading cluster resources table data.
+[2024-08-19 00:41:21,460 I 845526 845526] gcs_init_data.cc:93: Loading actor table data.
+[2024-08-19 00:41:21,460 I 845526 845526] gcs_init_data.cc:79: Loading placement group table data.
+[2024-08-19 00:41:21,460 I 845526 845526] gcs_init_data.cc:46: Finished loading job table data, size = 0
+[2024-08-19 00:41:21,460 I 845526 845526] gcs_init_data.cc:58: Finished loading node table data, size = 0
+[2024-08-19 00:41:21,460 I 845526 845526] gcs_init_data.cc:70: Finished loading cluster resources table data, size = 0
+[2024-08-19 00:41:21,460 I 845526 845526] gcs_init_data.cc:97: Finished loading actor table data, size = 0
+[2024-08-19 00:41:21,460 I 845526 845526] gcs_init_data.cc:84: Finished loading placement group table data, size = 0
+[2024-08-19 00:41:21,460 I 845526 845526] gcs_heartbeat_manager.cc:30: GcsHeartbeatManager start, num_heartbeats_timeout=30
+[2024-08-19 00:41:21,477 I 845526 845526] grpc_server.cc:112: GcsServer server started, listening on port 45315.
+[2024-08-19 00:41:21,495 I 845526 845526] gcs_server.cc:339: Gcs server address = 128.105.19.73:45315
+[2024-08-19 00:41:21,495 I 845526 845526] gcs_server.cc:343: Finished setting gcs server address: 128.105.19.73:45315
+[2024-08-19 00:41:21,496 I 845526 845526] gcs_server.cc:531: GcsNodeManager: {RegisterNode request count: 0, DrainNode request count: 0, GetAllNodeInfo request count: 0, GetInternalConfig request count: 0}
+GcsActorManager: {RegisterActor request count: 0, CreateActor request count: 0, GetActorInfo request count: 0, GetNamedActorInfo request count: 0, GetAllActorInfo request count: 0, KillActor request count: 0, ListNamedActors request count: 0, Registered actors count: 0, Destroyed actors count: 0, Named actors count: 0, Unresolved actors count: 0, Pending actors count: 0, Created actors count: 0}
+GcsPlacementGroupManager: {CreatePlacementGroup request count: 0, RemovePlacementGroup request count: 0, GetPlacementGroup request count: 0, GetAllPlacementGroup request count: 0, WaitPlacementGroupUntilReady request count: 0, GetNamedPlacementGroup request count: 0, Scheduling pending placement group count: 0, Registered placement groups count: 0, Named placement group count: 0, Pending placement groups count: 0}
+GcsPubSub:
+- num channels subscribed to: 0
+- total commands queued: 0
+DefaultTaskInfoHandler: {AddTask request count: 0, GetTask request count: 0, AddTaskLease request count: 0, GetTaskLease request count: 0, AttemptTaskReconstruction request count: 0}
+GrpcBasedResourceBroadcaster: {Tracked nodes: 0}

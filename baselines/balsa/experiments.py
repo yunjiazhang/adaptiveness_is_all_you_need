@@ -582,10 +582,11 @@ class BaselineStats(Baseline):
         p = super().Params()
         p.sim_checkpoint = None
         p.agent_checkpoint = None
-        p.query_dir = '/mnt/workspace/adaptiveness_vs_learning/queries/stats/original/all/'
+        p.query_dir = '/nobackup/yunjia/adaptiveness_vs_learning/queries/stats/original/all/'
         p.query_glob = ['*.sql']
         p.test_query_glob = ['t*.sql']
         p.epochs = 50
+        p.validate_fraction = 0
         return p
 
 @balsa.params_registry.Register
@@ -596,12 +597,13 @@ class Balsa_StatsRandSplit(Balsa_JOBRandSplit):
         p.sim_checkpoint = None
         p.agent_checkpoint = None
         p.initial_timeout_ms = 3600000
-        p.query_dir = '/mnt/workspace/adaptiveness_vs_learning/queries/stats/original/balsa_stats_rand/'
+        p.query_dir = '/nobackup/yunjia/adaptiveness_vs_learning/queries/stats/original/balsa_stats_rand/'
         p.query_glob = ['*.sql']
         p.test_query_glob = ['t*.sql']
         p.epochs = 50
         p.skip_training_on_expert = False
         p.sim = True
+        p.validate_fraction = 0
         return p
     
 @balsa.params_registry.Register
@@ -612,17 +614,69 @@ class Balsa_StatsSlowSplit(Balsa_JOBSlowSplit):
         p.sim_checkpoint = None
         p.agent_checkpoint = None
         p.initial_timeout_ms = 3600000
-        p.query_dir = '/mnt/workspace/adaptiveness_vs_learning/queries/stats/original/balsa_stats_slow/'
+        p.query_dir = '/nobackup/yunjia/adaptiveness_vs_learning/queries/stats/original/balsa_stats_slow/'
         p.query_glob = ['*.sql']
         p.test_query_glob = ['t*.sql']
         p.epochs = 50
         p.skip_training_on_expert = False
         p.sim = True
+        p.validate_fraction = 0
         return p
 
 ########################## Stats configs ##########################
 
     
+
+########################## CEB imdb configs ##########################
+# @balsa.params_registry.Register
+# class BaselineCEBIMDB(Baseline):
+
+#     def Params(self):
+#         p = super().Params()
+#         p.sim_checkpoint = None
+#         p.agent_checkpoint = None
+#         p.query_dir = '/nobackup/yunjia/adaptiveness_vs_learning/queries/stats/original/all/'
+#         p.query_glob = ['*.sql']
+#         p.test_query_glob = ['t*.sql']
+#         p.epochs = 50
+#         p.validate_fraction = 0
+#         return p
+
+@balsa.params_registry.Register
+class Balsa_CEBIMDBRandSplit(Balsa_JOBRandSplit):
+
+    def Params(self):
+        p = super().Params()
+        p.sim_checkpoint = None
+        p.agent_checkpoint = None
+        p.initial_timeout_ms = 3600000
+        p.query_dir = '/nobackup/yunjia/adaptiveness_vs_learning/queries/ceb-imdb/original/ceb-imdb-rand-balsa'
+        p.query_glob = ['*.sql']
+        p.test_query_glob = ['t*.sql']
+        p.epochs = 50
+        p.skip_training_on_expert = False
+        p.sim = True
+        p.validate_fraction = 0
+        return p
+    
+@balsa.params_registry.Register
+class Balsa_CEBIMDBSlowSplit(Balsa_JOBSlowSplit):
+
+    def Params(self):
+        p = super().Params()
+        p.sim_checkpoint = None
+        p.agent_checkpoint = None
+        p.initial_timeout_ms = 3600000
+        p.query_dir = '/nobackup/yunjia/adaptiveness_vs_learning/queries/ceb-imdb/original/ceb-imdb-slow-balsa'
+        p.query_glob = ['*.sql']
+        p.test_query_glob = ['t*.sql']
+        p.epochs = 50
+        p.skip_training_on_expert = False
+        p.sim = True
+        p.validate_fraction = 0
+        return p
+
+########################## CEB imdb configs ##########################
     
 
 ########################## Neo-impl experiments ##########################

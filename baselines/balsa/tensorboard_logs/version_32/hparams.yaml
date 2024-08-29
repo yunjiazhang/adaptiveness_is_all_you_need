@@ -1,0 +1,159 @@
+adamw: NoneType
+agent_checkpoint: NoneType
+avoid_eq_filters: false
+beam: 20
+bs: 1024
+bushy: true
+check_hint: true
+cls: type/experiments/Balsa_CEBIMDBRandSplit
+cost_model: mincardcost
+cross_entropy: false
+db: imdbload
+dedup_training_data: true
+drop_cache: true
+dropout: 0.0
+early_stop_on_skip_fraction: NoneType
+ema_decay: 0.95
+engine: postgres
+engine_dialect_query_dir: NoneType
+epochs: 50
+epsilon_greedy: 0
+epsilon_greedy_random_plan: false
+epsilon_greedy_random_transform: false
+epsilon_greedy_within_beam_search: false
+eval_latency_output_path: eval-latency.csv
+eval_output_path: eval-cost.csv
+explore_soft_v: false
+explore_visit_counts: false
+explore_visit_counts_latency_sort: false
+explore_visit_counts_sort: true
+final_decay_rate: NoneType
+finetune_out_mlp_only: false
+generic_ops_only_for_min_card_cost: false
+gradient_clip_val: 0
+increment_iter_despite_timeouts: true
+infer_beam_size: 20
+infer_search_method: beam_bk
+infer_search_until_n_complete_plans: 10
+inherit_optimizer_state: false
+init_experience: data/initial_policy_data.pkl
+initial_timeout_ms: 3600000
+l2_lambda: 0
+label_transform_running_stats: false
+label_transforms:
+- log1p
+- standardize
+linear_decay_to_zero: false
+loss_type: null
+lr: 0.001
+lr_decay_iters: NoneType
+lr_decay_rate: NoneType
+lr_piecewise:
+- !!python/tuple
+  - 0
+  - 0.001
+- !!python/tuple
+  - 60
+  - 0.0005
+- !!python/tuple
+  - 110
+  - 0.00025
+- !!python/tuple
+  - 160
+  - 0.000125
+- !!python/tuple
+  - 210
+  - 0.0001
+mlp_hiddens:
+- 512
+- 512
+- 512
+on_policy: true
+param_noise: 0.0
+param_tau: 1.0
+per_transition_sgd_steps: -1
+perturb_query_features: null
+physical_execution_hindsight: false
+plan_feat_dims: 71
+plan_featurizer_cls: type/balsa.util.plans_lib/PhysicalTreeNodeFeaturizer
+plan_physical: true
+planner_config: NoneType
+pos_embs: true
+prev_replay_buffers_glob: NoneType
+prev_replay_buffers_glob_val: NoneType
+prev_replay_keep_last_fraction: 1
+query_dir: /nobackup/yunjia/adaptiveness_vs_learning/queries/ceb-imdb/original/ceb-imdb-rand-balsa
+query_feat_dims: 23
+query_featurizer_cls: type/sim/SimQueryFeaturizer
+query_glob:
+- '*.sql'
+real_use_plan_restrictions: true
+reduce_lr_within_val_iter: false
+relax_timeout_factor: NoneType
+relax_timeout_on_n_timeout_iters: NoneType
+replay_buffer_reset_at_iter: NoneType
+run_baseline: false
+search.cls: type/balsa.search/DynamicProgramming
+search.collect_data_include_suboptimal: true
+search.cost_model.cls: type/balsa.costing/MinCardCost
+search.cost_model.cost_physical_ops: true
+search.plan_physical_ops: true
+search.search_space: bushy
+search_method: beam_bk
+search_space_join_ops:
+- Hash Join
+- Nested Loop
+search_space_scan_ops:
+- Index Scan
+- Index Only Scan
+- Seq Scan
+search_until_n_complete_plans: 10
+sim: true
+sim_checkpoint: NoneType
+sim_data_collection_intermediate_goals: true
+sim_query_featurizer: true
+sim_use_plan_restrictions: true
+skip_data_collection_geq_num_rels: 12
+skip_sim_init_iter_1p: false
+skip_training_on_expert: false
+skip_training_on_timeouts: false
+special_timeout_label: true
+test_after_n_iters: 0
+test_every_n_iters: 1
+test_query_glob:
+- t*.sql
+test_using_retrained_model: false
+timeout_slack: 2
+track_model_moving_averages: false
+tree_conv: true
+tree_conv_version: null
+update_label_stats_every_iter: true
+use_adaptive_lr: NoneType
+use_adaptive_lr_decay_to_zero: NoneType
+use_cache: true
+use_ema_source: false
+use_last_n_iters: -1
+use_local_execution: true
+use_new_data_only: false
+use_timeout: true
+use_tree_conv: true
+v2: true
+val_iters: 500
+validate_early_stop_patience: 3
+validate_every_n_epochs: 5
+validate_fraction: 0
+wandb_name: Balsa_CEBIMDBRandSplit_try1
+workload.cls: type/balsa.envs.envs/JoinOrderBenchmark
+workload.loop_through_queries: false
+workload.query_dir: /nobackup/yunjia/adaptiveness_vs_learning/queries/ceb-imdb/original/ceb-imdb-rand-balsa
+workload.query_glob:
+- '*.sql'
+workload.search_space_join_ops:
+- Hash Join
+- Nested Loop
+workload.search_space_scan_ops:
+- Index Scan
+- Index Only Scan
+- Seq Scan
+workload.test_query_glob:
+- t*.sql

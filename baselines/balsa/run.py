@@ -706,9 +706,16 @@ class BalsaAgent(object):
         self.prev_optimizer_state_dict = None
         # Ray.
         if p.use_local_execution:
-            ray.init(resources={'pg': 1})
+            print("Initilizing ray locally...")
+            ray.init(
+                num_cpus=4, 
+                _temp_dir="/tmp/ray",                
+                resources={'pg': 1},
+            )
+            print("Finished initilization.")
         else:
             # Cluster access: make sure the cluster has been launched.
+            print("Initilizing ray in remote mode...")
             import uuid
             ray.init(address='auto',
                      namespace=f'{uuid.uuid4().hex[:4]}',

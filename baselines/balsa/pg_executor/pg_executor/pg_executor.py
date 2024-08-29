@@ -27,11 +27,11 @@ import ray
 # JOB/IMDB.
 # LOCAL_DSN = "postgres://psycopg:psycopg@localhost/imdb"
 
-# LOCAL_DSN = "host=/tmp dbname=imdbload"
-# REMOTE_DSN = "postgres://psycopg:psycopg@localhost/imdbload"
+LOCAL_DSN = "host=/tmp dbname=imdbload"
+REMOTE_DSN = "postgres://psycopg:psycopg@localhost/imdbload"
 
-LOCAL_DSN = "host=/tmp dbname=stats"
-REMOTE_DSN = "postgres://psycopg:psycopg@localhost/stats"
+# LOCAL_DSN = "host=/tmp dbname=stats"
+# REMOTE_DSN = "postgres://psycopg:psycopg@localhost/stats"
 
 # TPC-H.
 # LOCAL_DSN = "postgres://psycopg:psycopg@localhost/tpch-sf10"

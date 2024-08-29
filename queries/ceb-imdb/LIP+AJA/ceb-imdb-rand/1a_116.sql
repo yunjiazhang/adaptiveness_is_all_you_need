@@ -26,3 +26,4 @@ AND rt.role IN ('miscellaneous crew')
 AND n.gender IN ('f')
 AND t.production_year <= 1975
 AND 1875 < t.production_year
+;

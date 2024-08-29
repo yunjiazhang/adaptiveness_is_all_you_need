@@ -1,0 +1,7 @@
+[2024-08-19 00:41:22,524 I 845570 845570] io_service_pool.cc:35: IOServicePool is running with 1 io_service.
+[2024-08-19 00:41:22,525 I 845570 845570] store_runner.cc:30: Allowing the Plasma store to use up to 200GB of memory.
+[2024-08-19 00:41:22,525 I 845570 845570] store_runner.cc:46: Starting object store with directory /dev/shm, fallback ./tmp/ray, and huge page support disabled
+[2024-08-19 00:41:22,525 I 845570 845599] dlmalloc.cc:146: create_and_mmap_buffer(200000012296, /dev/shm/plasmaXXXXXX)
+[2024-08-19 00:41:22,625 E 845570 845599] logging.cc:317: *** SIGABRT received at time=1724046082 on cpu 19 ***
+[2024-08-19 00:41:22,625 E 845570 845599] logging.cc:317: PC: @     0x7f08c9e969fc  (unknown)  pthread_kill
+[2024-08-19 00:41:22,625 E 845570 845599] logging.cc:317:     @     0x7f08c9e42520  (unknown)  (unknown)

@@ -14,6 +14,9 @@ LIP_OPTIMIZATION_SEL_THRESHOLD_FACT = 0.0001
 LIP_OPTIMIZATION_SEL_THRESHOLD_DIM = 0.05
 INDEX_AVAILABILITY = {}
 
+AJA_JOIN_SWITCH_THRESHOLD_WITH_INDEX = 500000
+AJA_JOIN_SWITCH_THRESHOLD_WITHOUT_INDEX = 1
+
 class PostgresConnector:
 
     def __init__(
@@ -234,10 +237,10 @@ def aja_optimization(plan_tree):
             assert len(children) == 2
             left_type, left_size = aja(children[0])
             right_type, right_size = aja(children[1])
-            if 'Index' in right_type and ('Nest' in node.lip_info['Type'] or 'Merge' in node.lip_info['Type']) and left_size > 500000:
+            if 'Index' in right_type and ('Nest' in node.lip_info['Type'] or 'Merge' in node.lip_info['Type']) and left_size > AJA_JOIN_SWITCH_THRESHOLD_WITH_INDEX:
                 # print(f"Switching from {node.lip_info['Type']} to Hash Join")
                 node.lip_info['Type'] = 'Hash Join'
-            if 'Seq' in right_type and ('Nest' in node.lip_info['Type'] or 'Merge' in node.lip_info['Type']) and left_size > 1:
+            if 'Seq' in right_type and ('Nest' in node.lip_info['Type'] or 'Merge' in node.lip_info['Type']) and left_size > AJA_JOIN_SWITCH_THRESHOLD_WITHOUT_INDEX:
                 # print(f"Switching from {node.lip_info['Type']} to Hash Join")
                 node.lip_info['Type'] = 'Hash Join'
             if 'Scan' not in right_type and 'Scan' not in left_type and 'Hash' not in node.lip_info['Type']:
@@ -409,20 +412,40 @@ def LIP_AJA_rewrite(sql, lip_opt=True, aja_opt=True, evaluate=False):
 if __name__ == "__main__":
 
     import os
-    queries_dir = '/u/y/u/yunjia/nobackup/yunjia/adaptiveness_vs_learning/queries/ceb-imdb/LIP+AJA/ceb-imdb-rand/'
-    all_files = sorted([s for s in os.listdir(queries_dir) if '.sql' in s])
-    DEBUG = True
-    os.system(f"mkdir {os.path.join(queries_dir, 'lip_aja_auto_rewrite/')}")
-    for sql_file in tqdm(all_files):
-        print(sql_file)
-        with open(os.path.join(queries_dir, sql_file), encoding='utf8') as f, open(os.path.join(queries_dir, 'lip_aja_auto_rewrite', sql_file), 'w') as g:
-            sql_str = f.read()
-            if DEBUG:
-                print("Original SQL: ", sql_str)
-            rewriten = LIP_AJA_rewrite(sql_str, True, True,)
-            if DEBUG:
-                print("Rewriten SQL: ", rewriten)
-            g.write(rewriten)
-        # break
+
+    working_query_dirs = [
+        '/u/y/u/yunjia/nobackup/yunjia/adaptiveness_vs_learning/queries/ceb-imdb/LIP+AJA/ceb-imdb-rand/',
+        '/u/y/u/yunjia/nobackup/yunjia/adaptiveness_vs_learning/queries/ceb-imdb/LIP+AJA/ceb-imdb-slow/',
+    ]
+
+    DEBUG = False
+    SKIP_REWRITTEN_QUERIES = True
+
+    for queries_dir in working_query_dirs:
+        all_files = sorted([s for s in os.listdir(queries_dir) if '.sql' in s])
+
+        errors = []
+        os.system(f"mkdir {os.path.join(queries_dir, 'lip_aja_auto_rewrite/')}")
+        for sql_file in tqdm(all_files):
+            print(sql_file)
+            if SKIP_REWRITTEN_QUERIES and os.path.exists(os.path.join(queries_dir, 'lip_aja_auto_rewrite', sql_file)):
+                continue
+            try:
+                with open(os.path.join(queries_dir, sql_file), encoding='utf8') as f, \
+                     open(os.path.join(queries_dir, 'lip_aja_auto_rewrite', sql_file), 'w') as g:
+                    
+                    sql_str = f.read()
+                    if DEBUG:
+                        print("Original SQL: ", sql_str)
+                    rewriten = LIP_AJA_rewrite(sql_str, True, True,)
+                    if DEBUG:
+                        print("Rewriten SQL: ", rewriten)
+                    g.write(rewriten)
+            except Exception as e:
+                errors.append((sql_file, e))
+                print(e)
+                continue
+        print(f"There are {len(errors)} errors in {queries_dir}.")
+        print(errors)
 
     

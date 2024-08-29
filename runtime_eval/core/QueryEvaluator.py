@@ -68,7 +68,7 @@ class PostgresQueryEvaluator:
 
     def evaluate_queries(
                 self,
-                rerun_finished=True,
+                rerun_finished=False,
             ):
         
         """Evaluates the execution time of queries in the directory and outputs the result as a JSON dictionary."""
@@ -115,7 +115,7 @@ class PostgresQueryEvaluator:
     def run(
             self, 
             query_log_file='query_execution_times.json',
-            rerun_finished=True,
+            rerun_finished=False,
             ):
         """Runs the entire evaluation process."""
         self.query_log_file = query_log_file
@@ -123,3 +123,86 @@ class PostgresQueryEvaluator:
         self.evaluate_queries(rerun_finished=rerun_finished)
         self.disconnect_from_db()
 
+class PostgresLIPQueryEvaluator(PostgresQueryEvaluator):
+    def __init__(self, db_config, query_directory, debug_mode=False):
+        super().__init__(db_config, query_directory)
+        self.debug_mode = debug_mode
+
+    def connect_to_db(self):
+        """Establishes a connection to the PostgreSQL database."""
+        super().connect_to_db()
+        self.cursor.execute("DROP EXTENSION IF EXISTS pg_lip_bloom;")
+        self.cursor.execute("CREATE EXTENSION pg_lip_bloom;")
+
+    def evaluate_queries(
+                self,
+                rerun_finished=False,
+            ):
+        
+        """Evaluates the execution time of queries in the directory and outputs the result as a JSON dictionary."""
+        if self.query_log_file and os.path.exists(self.query_log_file):
+            with open(self.query_log_file, 'r') as infile:
+                query_times = json.load(infile)
+        else:
+            query_times = {}
+        
+        all_queries = sorted([q for q in os.listdir(self.query_directory)])
+        for qn, query_file in enumerate(all_queries):
+            print(f"Running query {query_file} ({qn} / {len(all_queries)})...")
+            query_path = os.path.join(self.query_directory, query_file)
+            if not (query_file not in query_times or rerun_finished):
+                print(f"\tQuery {query_file} has already been evaluated. Skipping...")
+                continue
+            if os.path.isfile(query_path) and query_file.endswith('.sql'):
+                with open(query_path, 'r') as file:
+                    query = file.read()
+                
+                queries_splited = query.split(';')
+                # remove the last empty string
+                queries_splited = queries_splited[:-1]
+                # remove commented lines
+                queries_splited = [q for q in queries_splited if not q.startswith('--')]
+                prepration_queries = [q for q in queries_splited if (
+                    'pg_lip_bloom_set_dynamic' in q
+                    or 'pg_lip_bloom_init' in q)]
+                execution_queries = [q for q in queries_splited if (
+                    'pg_lip_bloom_set_dynamic' not in q
+                    and 'pg_lip_bloom_init' not in q)] 
+
+                execution_times = []
+                for i in range(self.MAX_RUNS):
+                    for q in prepration_queries:
+                        try:
+                            self.cursor.execute(q)
+                            self.conn.commit() 
+                        except Exception as e:
+                            print(f"\tError executing query {q} ({e})")
+                            self.conn.rollback()
+                            continue
+                        if self.debug_mode:
+                            print(f"\tQuery {q}: executed successfully.")
+                    current_execution_times = []
+                    for q in execution_queries:
+                        start_time = time.time()
+                        try:
+                            self.cursor.execute(q)
+                            self.conn.commit() 
+                        except Exception as e:
+                            print(f"\tError executing query {q}: {e}")
+                            self.conn.rollback()
+                            continue
+                        end_time = time.time()
+                        if self.debug_mode:
+                            print(f"\tQuery {q}: executed successfully with time {end_time - start_time:.2f} seconds.")
+                        current_execution_times.append(end_time - start_time)
+                    execution_times.append(current_execution_times)
+                    print(f"\tQuery {query_file} executed successfully in {current_execution_times} seconds.")
+                
+                query_times[query_file] = execution_times
+        
+            # Output the results to a JSON dictionary
+            if qn % 10 == 0 or qn == len(all_queries) - 1:
+                with open(self.query_log_file, 'w') as outfile:
+                    json.dump(query_times, outfile, indent=4)
+        
+        print(f"Query execution times have been saved to {self.query_log_file}.")
