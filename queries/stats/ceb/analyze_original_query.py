@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[10]:
+# In[1]:
 
 
 # get_ipython().run_line_magic('load_ext', 'autoreload')
@@ -28,7 +28,7 @@ def sql_formater(sql):
     return sqlparse.format(sql, reindent=True, keyword_case='upper')
 
 
-# # Evaluate the original PG
+# # Evaluate CEB
 
 # In[ ]:
 
@@ -44,30 +44,34 @@ db_config = {
 query_directory = './all/'
 print("Running queries: ", os.listdir(query_directory))
 
+# import sys
+# ceb_file_name = sys.argv[1]
 
-evaluator = PostgresQueryEvaluator(
-    db_config, 
-    query_directory,                                   
-    debug_mode=False, 
-)
+for ceb_file_name in [
+    'stats_CEB_sub_queries_bayescard.txt',
+    'stats_CEB_sub_queries_deepdb.txt',
+    'stats_CEB_sub_queries_flat.txt',
+    'stats_CEB_sub_queries_neurocard.txt'
+]:
+# assert ceb_file_name in [ 
+#     'stats_CEB_sub_queries_bayescard.txt',
+#     'stats_CEB_sub_queries_deepdb.txt',
+#     'stats_CEB_sub_queries_flat.txt',
+#     'stats_CEB_sub_queries_neurocard.txt'
+# ], "You should provide a valide ceb_file_name"
 
-evaluator.run(
-    query_log_file = f'postgres-stats-original.json',
-    rerun_finished=False,
-    sample_size=None
-)
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
+    evaluator = PostgresCEBQueryEvaluator(
+        db_config, 
+        query_directory,                                   
+        debug_mode=False, 
+        ceb_file_name=ceb_file_name
+    )
+    
+    evaluator.run(
+        query_log_file = f'ceb-stats-{ceb_file_name.split(".")[0]}.json',
+        rerun_finished=False,
+        sample_size=None
+    )
 
 
 # In[19]:
