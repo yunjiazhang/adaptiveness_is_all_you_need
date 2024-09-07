@@ -14,6 +14,7 @@ from tqdm import tqdm
 
 class PostgresQueryEvaluator:
     def __init__(self, db_config, query_directory,
+                 query_files=None,
                  debug_mode=False, timeout_mil=1200000
                 ):
         """
@@ -24,6 +25,7 @@ class PostgresQueryEvaluator:
         """
         self.db_config = db_config
         self.query_directory = query_directory
+        self.query_files = query_files
         self.query_log_file = None
         self.debug_mode = debug_mode
         self.MAX_RUNS = 1
@@ -36,7 +38,7 @@ class PostgresQueryEvaluator:
             self.conn = psycopg2.connect(**self.db_config)
             self.cursor = self.conn.cursor()
             if self.timeout_mil is not None:
-                self.execute_query(f"set statement_timeout to {self.timeout_mil};")
+                self.execute_query(f"set statement_timeout to {self.timeout_mil};", return_results=False)
                 timeout = self.execute_query(f"show statement_timeout;")
                 print(f"Set statment timetout to {timeout}")
             print("Connected to the database successfully.")
@@ -59,7 +61,7 @@ class PostgresQueryEvaluator:
             if return_results:
                 return self.cursor.fetchall()
         except Exception as e:
-            print(f"Error executing query: {e}")
+            print(f"Error executing query: {query}; {e}")
             self.conn.rollback()
 
     def explain_query(self, query, execute=True):
@@ -88,7 +90,11 @@ class PostgresQueryEvaluator:
         else:
             query_times = {}
         
-        all_queries = sorted([q for q in os.listdir(self.query_directory)])
+        if self.query_files:
+            all_queries = sorted(self.query_files)
+        else:
+            all_queries = sorted([q for q in os.listdir(self.query_directory)])
+
         if sample_size is not None:
             import random
             all_queries = random.sample(all_queries, sample_size)
@@ -112,6 +118,7 @@ class PostgresQueryEvaluator:
                         self.conn.commit() 
                     except Exception as e:
                         print(f"\tError executing query {query_file}: {e}")
+                        print(f"\tTreating as a timeout.")
                         self.conn.rollback()
                         execution_times.append(self.timeout_mil)
                         break
@@ -147,26 +154,35 @@ class PostgresCEBQueryEvaluator(PostgresQueryEvaluator):
     def __init__(self, 
                  db_config, 
                  query_directory, 
+                 query_files=None,
                  debug_mode=False,
                  ceb_file_name='stats_CEB_sub_queries_bayescard.txt'
                  ):
-        super().__init__(db_config, query_directory)
         self.debug_mode = debug_mode
         self.ceb_file_name = ceb_file_name
+        if self.ceb_file_name is not None:
+            self.enable_ceb = True
+        else:
+            self.enable_ceb = False
+        super().__init__(db_config, query_directory, query_files, debug_mode)
 
-    def post_connection_config(self) :
-        self.cursor.execute("SET ml_cardest_enabled=true;")
-        self.cursor.execute("SET ml_joinest_enabled=true;")
-        self.cursor.execute("SET query_no=0;")
-        self.cursor.execute("SET join_est_no=0;")
-        self.cursor.execute(f"SET ml_cardest_fname='{self.ceb_file_name}';")
-        self.cursor.execute(f"SET ml_joinest_fname='{self.ceb_file_name}';")
+    def post_connection_config(self,):
+        if self.enable_ceb:
+            self.cursor.execute("SET ml_cardest_enabled=true;")
+            self.cursor.execute("SET ml_joinest_enabled=true;")
+            self.cursor.execute("SET query_no=0;")
+            self.cursor.execute("SET join_est_no=0;")
+            self.cursor.execute(f"SET ml_cardest_fname='{self.ceb_file_name}';")
+            self.cursor.execute(f"SET ml_joinest_fname='{self.ceb_file_name}';")
 
-        results = self.execute_query('SHOW ml_cardest_fname;')
-        print("Using ml_cardest_fname = ", results)
-        results = self.execute_query('SHOW ml_joinest_fname;')
-        print("Using ml_joinest_fname = ", results)
-    
+            results = self.execute_query('SHOW ml_cardest_fname;')
+            print("Using ml_cardest_fname = ", results)
+            results = self.execute_query('SHOW ml_joinest_fname;')
+            print("Using ml_joinest_fname = ", results)
+        else:
+            self.cursor.execute("SET ml_cardest_enabled=false;")
+            self.cursor.execute("SET ml_joinest_enabled=false;")
+
     def connect_to_db(self):
         """Establishes a connection to the PostgreSQL database."""
         super().connect_to_db()
@@ -189,8 +205,8 @@ class PostgresCEBQueryEvaluator(PostgresQueryEvaluator):
         
 
 class PostgresLIPQueryEvaluator(PostgresQueryEvaluator):
-    def __init__(self, db_config, query_directory, debug_mode=False):
-        super().__init__(db_config, query_directory)
+    def __init__(self, db_config, query_directory, query_files=None, debug_mode=False):
+        super().__init__(db_config, query_directory, query_files, debug_mode)
         self.debug_mode = debug_mode
 
     def connect_to_db(self):
@@ -246,6 +262,7 @@ class PostgresLIPQueryEvaluator(PostgresQueryEvaluator):
                             self.conn.commit() 
                         except Exception as e:
                             print(f"\tError executing query {query_file}: {e}")
+                            print(f"\tTreating as a timeout.")
                             self.conn.rollback()
                             execution_times.append(self.timeout_mil)
                             break

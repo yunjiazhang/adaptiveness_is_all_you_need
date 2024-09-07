@@ -6,10 +6,10 @@
 
 # get_ipython().run_line_magic('load_ext', 'autoreload')
 # get_ipython().run_line_magic('autoreload', '2')
-PATH = '/mnt/adaptiveness_vs_learning/runtime_eval/'
+PATH = '/nobackup/yunjia/adaptiveness_vs_learning/runtime_eval/'
 import sys
 sys.path.append(PATH)
-from core.eval_Runtime import *
+# from core.eval_Runtime import *
 from core.QueryEvaluator import *
 
 
@@ -35,10 +35,10 @@ def sql_formater(sql):
 
 db_config = {
     'dbname': 'stats',
-    'user': 'postgres',
-    'password': 'postgres',
+    'user': 'yunjia',
+    'password': 'yunjia',
     'host': 'localhost',
-    'port': '5432'
+    'port': '5433'
 }
 
 query_directory = './all/'
@@ -52,7 +52,7 @@ evaluator = PostgresQueryEvaluator(
 )
 
 evaluator.run(
-    query_log_file = f'postgres-stats-original.json',
+    query_log_file = f'postgres-stats-original-config.json',
     rerun_finished=False,
     sample_size=None
 )

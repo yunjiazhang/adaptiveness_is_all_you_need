@@ -1,26 +1,40 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[10]:
 
 
 # get_ipython().run_line_magic('load_ext', 'autoreload')
 # get_ipython().run_line_magic('autoreload', '2')
-PATH = '/mnt/adaptiveness_vs_learning/runtime_eval/'
+
+
+# In[11]:
+
+
+PATH = '/nobackup/yunjia/adaptiveness_vs_learning/runtime_eval/'
 import sys
 sys.path.append(PATH)
-from core.eval_Runtime import *
+# from core.eval_Runtime import *
 from core.QueryEvaluator import *
+import os
 
 
-# In[2]:
+# In[20]:
 
 
-all_stats_queries_dir = './all/'
-all_stats_qureies = [q for q in os.listdir(all_stats_queries_dir) if q.endswith('.sql')]
+all_needed_query_files = []
+stats_rand_queries_dir = './stats_rand/'
+for q in os.listdir(stats_rand_queries_dir):
+    if q.endswith('.sql'):
+        all_needed_query_files.append(q)
+
+stats_slow_queries_dir = './stats_slow/'
+for q in os.listdir(stats_slow_queries_dir):
+    if q.endswith('.sql'):
+        all_needed_query_files.append(q)
 
 
-# In[3]:
+# In[21]:
 
 
 import sqlparse
@@ -30,48 +44,52 @@ def sql_formater(sql):
 
 # # Evaluate CEB
 
-# In[ ]:
+# In[23]:
 
 
 db_config = {
     'dbname': 'stats',
-    'user': 'postgres',
-    'password': 'postgres',
+    'user': 'yunjia',
+    'password': 'yunjia',
     'host': 'localhost',
-    'port': '5432'
+    'port': '5433'
 }
 
 query_directory = './all/'
-print("Running queries: ", os.listdir(query_directory))
+print("Running queries: ", all_needed_query_files)
 
-# import sys
-# ceb_file_name = sys.argv[1]
 
-for ceb_file_name in [
-    'stats_CEB_sub_queries_bayescard.txt',
-    'stats_CEB_sub_queries_deepdb.txt',
-    'stats_CEB_sub_queries_flat.txt',
-    'stats_CEB_sub_queries_neurocard.txt'
-]:
-# assert ceb_file_name in [ 
+
+# for ceb_file_name in [
 #     'stats_CEB_sub_queries_bayescard.txt',
 #     'stats_CEB_sub_queries_deepdb.txt',
 #     'stats_CEB_sub_queries_flat.txt',
 #     'stats_CEB_sub_queries_neurocard.txt'
-# ], "You should provide a valide ceb_file_name"
+# ]:
 
+def eval_CEB(ceb_file_name):
     evaluator = PostgresCEBQueryEvaluator(
         db_config, 
-        query_directory,                                   
+        query_directory,
+        query_files=all_needed_query_files,                                   
         debug_mode=False, 
         ceb_file_name=ceb_file_name
     )
-    
+
     evaluator.run(
         query_log_file = f'ceb-stats-{ceb_file_name.split(".")[0]}.json',
         rerun_finished=False,
         sample_size=None
     )
+
+# parallel run of all ceb files
+from joblib import Parallel, delayed
+Parallel(n_jobs=2)(delayed(eval_CEB)(ceb_file_name) for ceb_file_name in [
+    'stats_CEB_sub_queries_bayescard.txt',
+    'stats_CEB_sub_queries_deepdb.txt',
+    'stats_CEB_sub_queries_flat.txt',
+    'stats_CEB_sub_queries_neurocard.txt'
+])
 
 
 # In[19]:

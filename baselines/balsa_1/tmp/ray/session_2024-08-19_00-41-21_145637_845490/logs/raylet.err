@@ -1,0 +1,10 @@
+terminate called after throwing an instance of 'boost::wrapexcept<boost::system::system_error>'
+  what():  Invalid argument
+*** SIGABRT received at time=1724046082 on cpu 19 ***
+terminate called recursively
+[failure_signal_handler.cc : 331] RAW: Signal 6 raised at PC=0x7f08c9e969fc while already in AbslFailureSignalHandler()
+PC: @     0x7f08c9e969fc  (unknown)  pthread_kill
+    @     0x7f08c9e42520  (unknown)  (unknown)
+[2024-08-19 00:41:22,625 E 845570 845599] logging.cc:317: *** SIGABRT received at time=1724046082 on cpu 19 ***
+[2024-08-19 00:41:22,625 E 845570 845599] logging.cc:317: PC: @     0x7f08c9e969fc  (unknown)  pthread_kill
+[2024-08-19 00:41:22,625 E 845570 845599] logging.cc:317:     @     0x7f08c9e42520  (unknown)  (unknown)
