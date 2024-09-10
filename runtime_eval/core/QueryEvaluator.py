@@ -15,7 +15,8 @@ from tqdm import tqdm
 class PostgresQueryEvaluator:
     def __init__(self, db_config, query_directory,
                  query_files=None,
-                 debug_mode=False, timeout_mil=1200000
+                 debug_mode=False, timeout_mil=1200000,
+                 max_runs=3,
                 ):
         """
         Initializes the QueryEvaluator with database configuration and the directory containing the queries.
@@ -28,7 +29,7 @@ class PostgresQueryEvaluator:
         self.query_files = query_files
         self.query_log_file = None
         self.debug_mode = debug_mode
-        self.MAX_RUNS = 1
+        self.MAX_RUNS = max_runs
         self.SAVE_FREQ = 1
         self.timeout_mil = timeout_mil
 
@@ -44,6 +45,8 @@ class PostgresQueryEvaluator:
             print("Connected to the database successfully.")
         except Exception as e:
             print(f"Error connecting to the database: {e}")
+            self.conn = None
+        assert self.conn is not None, "The connection should not be None"
 
     def disconnect_from_db(self):
         """Closes the database connection."""
@@ -156,7 +159,9 @@ class PostgresCEBQueryEvaluator(PostgresQueryEvaluator):
                  query_directory, 
                  query_files=None,
                  debug_mode=False,
-                 ceb_file_name='stats_CEB_sub_queries_bayescard.txt'
+                 ceb_file_name='stats_CEB_sub_queries_bayescard.txt',
+                 timeout_mil=1200000,
+                 max_runs=3,
                  ):
         self.debug_mode = debug_mode
         self.ceb_file_name = ceb_file_name
@@ -164,7 +169,7 @@ class PostgresCEBQueryEvaluator(PostgresQueryEvaluator):
             self.enable_ceb = True
         else:
             self.enable_ceb = False
-        super().__init__(db_config, query_directory, query_files, debug_mode)
+        super().__init__(db_config, query_directory, query_files, debug_mode, timeout_mil, max_runs)
 
     def post_connection_config(self,):
         if self.enable_ceb:
