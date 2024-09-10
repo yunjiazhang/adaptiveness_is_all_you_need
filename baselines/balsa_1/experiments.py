@@ -123,7 +123,7 @@ class BalsaParams(object):
         p.Define('epochs', 100, 'Num epochs to train.')
         p.Define('bs', 1024, 'Batch size.')
         p.Define('val_iters', 500, '# of value iterations.')
-        p.Define('increment_iter_despite_timeouts', False,
+        p.Define('increment_iter_despite_timeouts', True,
                  'Increment the iteration counter even if timeouts occurred?')
         p.Define('loss_type', None, 'Options: None (MSE), mean_qerror.')
         p.Define('cross_entropy', False, 'Use cross entropy loss formulation?')
@@ -324,6 +324,14 @@ class BalsaParams(object):
         p.Define('relax_timeout_on_n_timeout_iters', None,
                  'If there are this many timeout iterations up to now, relax'\
                  ' the current timeout by relax_timeout_factor.')
+
+        # aggressive timeout
+        p.Define('use_aggressive_timeout', False, 'Use aggressive timeout if not None.')
+        p.Define('use_timeout_for_test', False, 'Use timeout for test set?')
+        p.Define('use_aggressive_timeout_for_test', False, 'Use aggressive timeout for test set?')
+        p.Define('aggressive_timeout_ms_file', None, 
+                 'Use aggressive timeout if not None. The file should contain the query name and the timeout in seconds.')
+        p.Define('allow_timeout_for_test', False, 'Allow timeout for test set?')
 
         # Execution.
         p.Define('use_local_execution', False,
@@ -587,6 +595,10 @@ class BaselineStats(Baseline):
         p.test_query_glob = ['t*.sql']
         p.epochs = 50
         p.validate_fraction = 0
+
+        p.use_aggressive_timeout = False
+        p.use_timeout_for_test = False
+
         return p
 
 @balsa.params_registry.Register
@@ -604,6 +616,14 @@ class Balsa_StatsRandSplit(Balsa_JOBRandSplit):
         p.skip_training_on_expert = False
         p.sim = True
         p.validate_fraction = 0
+
+        p.use_aggressive_timeout = True
+        p.use_timeout_for_test = True
+        p.use_aggressive_timeout_for_test = True
+        p.aggressive_timeout_ms_file = './pg_runtime_logs/stats-ms.json'
+        p.allow_timeout_for_test = True
+        p.special_timeout_label = False
+
         return p
     
 @balsa.params_registry.Register
@@ -621,6 +641,14 @@ class Balsa_StatsSlowSplit(Balsa_JOBSlowSplit):
         p.skip_training_on_expert = False
         p.sim = True
         p.validate_fraction = 0
+
+        p.use_aggressive_timeout = True
+        p.use_timeout_for_test = True
+        p.use_aggressive_timeout_for_test = True
+        p.aggressive_timeout_ms_file = './pg_runtime_logs/stats-ms.json'
+        p.allow_timeout_for_test = True
+        p.special_timeout_label = False
+        
         return p
 
 ########################## Stats configs ##########################
@@ -650,7 +678,7 @@ class Balsa_CEBIMDBRandSplit(Balsa_JOBRandSplit):
         p.sim_checkpoint = None
         p.agent_checkpoint = None
         p.initial_timeout_ms = 600000
-        p.timeout_slack = 1.1
+        p.timeout_slack = 2
         p.query_dir = '/nobackup/yunjia/adaptiveness_vs_learning/queries/ceb-imdb/original/ceb-imdb-rand-balsa'
         # all_queries = os.listdir(p.query_dir)
         # sampled_train_query_num = 1000
@@ -665,6 +693,14 @@ class Balsa_CEBIMDBRandSplit(Balsa_JOBRandSplit):
         p.skip_training_on_expert = False
         p.sim = True
         p.validate_fraction = 0
+
+        p.use_aggressive_timeout = True
+        p.use_timeout_for_test = True
+        p.use_aggressive_timeout_for_test = True
+        p.aggressive_timeout_ms_file = './pg_runtime_logs/ceb-imdb-ms.json'
+        p.allow_timeout_for_test = True
+        p.special_timeout_label = False
+
         return p
     
 @balsa.params_registry.Register
@@ -675,7 +711,7 @@ class Balsa_CEBIMDBRandSplit_Sample(Balsa_JOBRandSplit):
         p.sim_checkpoint = None
         p.agent_checkpoint = None
         p.initial_timeout_ms = 600000
-        p.timeout_slack = 1.1
+        p.timeout_slack = 2
 
         import os
         p.query_dir = '/nobackup/yunjia/adaptiveness_vs_learning/queries/ceb-imdb/original/ceb-imdb-rand-balsa'
@@ -692,10 +728,18 @@ class Balsa_CEBIMDBRandSplit_Sample(Balsa_JOBRandSplit):
         p.test_query_glob = [q for q in sampled_train_queries if q.startswith('t')]
         # p.test_query_glob = ['t*.sql']
 
-        p.epochs = 10
+        p.epochs = 5
         p.skip_training_on_expert = False
         p.sim = True
         p.validate_fraction = 0
+
+        p.use_aggressive_timeout = True
+        p.use_timeout_for_test = True
+        p.use_aggressive_timeout_for_test = True
+        p.aggressive_timeout_ms_file = './pg_runtime_logs/ceb-imdb-ms.json'
+        p.allow_timeout_for_test = True
+        p.special_timeout_label = False
+
         return p
 
 @balsa.params_registry.Register
@@ -706,7 +750,7 @@ class Balsa_CEBIMDBSlowSplit(Balsa_JOBSlowSplit):
         p.sim_checkpoint = None
         p.agent_checkpoint = None
         p.initial_timeout_ms = 600000
-        p.timeout_slack = 1.1
+        p.timeout_slack = 2
         p.query_dir = '/nobackup/yunjia/adaptiveness_vs_learning/queries/ceb-imdb/original/ceb-imdb-slow-balsa'
         p.query_glob = ['*.sql']
         p.test_query_glob = ['t*.sql']
@@ -714,6 +758,14 @@ class Balsa_CEBIMDBSlowSplit(Balsa_JOBSlowSplit):
         p.skip_training_on_expert = False
         p.sim = True
         p.validate_fraction = 0
+
+        p.use_aggressive_timeout = True
+        p.use_timeout_for_test = True
+        p.use_aggressive_timeout_for_test = True
+        p.aggressive_timeout_ms_file = './pg_runtime_logs/ceb-imdb-ms.json'
+        p.allow_timeout_for_test = True
+        p.special_timeout_label = False
+
         return p
 
 @balsa.params_registry.Register
@@ -724,7 +776,7 @@ class Balsa_CEBIMDBSlowSplit_Sample(Balsa_JOBSlowSplit):
         p.sim_checkpoint = None
         p.agent_checkpoint = None
         p.initial_timeout_ms = 600000
-        p.timeout_slack = 1.1
+        p.timeout_slack = 2
         
         import os
         p.query_dir = '/nobackup/yunjia/adaptiveness_vs_learning/queries/ceb-imdb/original/ceb-imdb-slow-balsa'
@@ -739,10 +791,18 @@ class Balsa_CEBIMDBSlowSplit_Sample(Balsa_JOBSlowSplit):
         p.test_query_glob = [q for q in sampled_train_queries if q.startswith('t')]
         # p.test_query_glob = ['t*.sql']
 
-        p.epochs = 10
+        p.epochs = 5
         p.skip_training_on_expert = False
         p.sim = True
         p.validate_fraction = 0
+
+        p.use_aggressive_timeout = True
+        p.use_timeout_for_test = True
+        p.use_aggressive_timeout_for_test = True
+        p.aggressive_timeout_ms_file = './pg_runtime_logs/ceb-imdb-ms.json'
+        p.allow_timeout_for_test = True
+        p.special_timeout_label = False
+
         return p
 
 ########################## CEB imdb configs ##########################

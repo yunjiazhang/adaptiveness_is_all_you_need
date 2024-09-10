@@ -67,12 +67,14 @@ def eval_CEB(ceb_file_name):
         query_directory,
         query_files=all_needed_query_files,                                   
         debug_mode=False, 
-        ceb_file_name=ceb_file_name
+        ceb_file_name=ceb_file_name,
+        timeout_mil=0,
+        max_runs=1,
     )
     if ceb_file_name is not None:
-        query_log_file = f"postgres-{ceb_file_name.split('.')[0]}-est-card.json"
+        query_log_file = f"postgres-{ceb_file_name.split('.')[0]}-est-card-non-parallel.json"
     else:
-        query_log_file = 'postgres-stats-est-card.json'
+        query_log_file = 'postgres-stats-est-card-non-parallel.json'
     evaluator.run(
         query_log_file=query_log_file,
         rerun_finished=True,
@@ -86,6 +88,6 @@ Parallel(n_jobs=1)(delayed(eval_CEB)(ceb_file_name) for ceb_file_name in [
     None,
     # 'stats_CEB_sub_queries_bayescard.txt',
     'stats_CEB_sub_queries_deepdb.txt',
-    # 'stats_CEB_sub_queries_flat.txt',
+    'stats_CEB_sub_queries_flat.txt',
     # 'stats_CEB_sub_queries_neurocard.txt'
 ])

@@ -682,7 +682,12 @@ class BalsaAgent(object):
             no_op=not p.use_timeout,
             relax_timeout_factor=p.relax_timeout_factor,
             relax_timeout_on_n_timeout_iters=p.relax_timeout_on_n_timeout_iters,
-            initial_timeout_ms=p.initial_timeout_ms)
+            initial_timeout_ms=p.initial_timeout_ms,
+            use_aggressive_timeout=p.use_aggressive_timeout)
+        if p.use_aggressive_timeout:
+            print('Using aggressive timeout.')
+            print('Aggressive timeout file:', p.aggressive_timeout_ms_file)
+            self.timeout_controller.InitAggressiveTimeout(p.aggressive_timeout_ms_file)
         self.query_execution_cache = execution.QueryExecutionCache()
         self.best_plans = execution.QueryExecutionCache()
         self.trainer = None
@@ -1451,10 +1456,14 @@ class BalsaAgent(object):
 
             # Launch tasks.
             if is_test:
-                curr_timeout = None
+                if p.use_aggressive_timeout_for_test or p.use_timeout_for_test:
+                    # Use timeout controller to get timeout.
+                    curr_timeout = self.timeout_controller.GetTimeout(node)
+                else:
+                    # curr_timeout = None
+                    # Roughly 18 mins.  Good enough to cover disk filled error.
+                    curr_timeout = 1100000
 
-                # Roughly 18 mins.  Good enough to cover disk filled error.
-                curr_timeout = 1100000
             else:
                 curr_timeout = self.timeout_controller.GetTimeout(node)
             print('q{},(predicted {:.1f}),{}'.format(node.info['query_name'],
@@ -1658,6 +1667,8 @@ class BalsaAgent(object):
                 num_timeouts += 1
                 self.num_total_timeouts += 1
                 if p.special_timeout_label:
+                    real_cost = self.timeout_controller.GetTimeout(node)
+                elif p.use_aggressive_timeout:
                     real_cost = self.timeout_label()
                     print('Timeout detected! Assigning a special label',
                           real_cost, '(server_ip={})'.format(server_ip))
@@ -1749,6 +1760,7 @@ class BalsaAgent(object):
                           to_execute_test,
                           execution_results,
                           tag='latency_test'):
+        p = self.params
         assert len(self.test_nodes) == len(execution_results)
         iter_total_latency = 0
         rows = []
@@ -1763,8 +1775,13 @@ class BalsaAgent(object):
                                                 execution_results):
             _, real_cost, _ = result_tup
             if real_cost < 0:
-                has_timeouts = True
-                break
+                if not p.allow_timeout_for_test:
+                    has_timeouts = True
+                    break
+                else:
+                    has_timeouts = False
+                    # assign real cost to timeout cost
+                    real_cost = self.timeout_controller.GetTimeout(node)
             iter_total_latency += real_cost
             rows.append((node.info['query_name'], real_cost / 1e3,
                          self.curr_value_iter))
@@ -1774,7 +1791,7 @@ class BalsaAgent(object):
             agent_plans_diffs.append((real_cost - to_execute[-2]) / 1e3)
             expert_plans_diffs.append(
                 (node.cost - node.info['curr_predicted_latency']) / 1e3)
-        if has_timeouts:
+        if has_timeouts and (not p.allow_timeout_for_test):
             # "Timeouts" for test set queries are rare events such as
             # out-of-disk errors due to a lot of intermediate results being
             # written out.
@@ -1856,7 +1873,8 @@ class BalsaAgent(object):
         iter_total_latency, has_timeouts = self.FeedbackExecution(
             to_execute, execution_results)
         # Logging.
-        if not has_timeouts:
+        # changed to always log the experience
+        if not has_timeouts or p.allow_timeout_for_test:
             self.overall_best_train_latency = min(
                 self.overall_best_train_latency, iter_total_latency / 1e3)
             to_log = [

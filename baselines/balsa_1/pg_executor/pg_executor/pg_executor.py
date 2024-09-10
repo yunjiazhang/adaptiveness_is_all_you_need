@@ -124,7 +124,7 @@ def Execute(sql, verbose=False, geqo_off=False, timeout_ms=None, cursor=None):
       A pg_executor.Result.
     """
     if verbose:
-        print("PG executing: ", sql)
+        print(f"PG executing: (timeout={timeout_ms})", sql)
 
     _SetGeneticOptimizer('off' if geqo_off else 'on', cursor)
     if timeout_ms is not None:

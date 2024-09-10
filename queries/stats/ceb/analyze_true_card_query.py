@@ -80,12 +80,8 @@ def eval_CEB(ceb_file_name):
 
 # parallel run of all ceb files
 from joblib import Parallel, delayed
-Parallel(n_jobs=2)(delayed(eval_CEB)(ceb_file_name) for ceb_file_name in [
-    # 'stats_CEB_sub_queries_bayescard.txt',
-    'stats_CEB_sub_queries_deepdb.txt',
-    'stats_CEB_sub_queries_flat.txt',
-    # 'stats_CEB_sub_queries_neurocard.txt',
-    # 'stats_CEB_sub_queries_truecard.txt'
+Parallel(n_jobs=1)(delayed(eval_CEB)(ceb_file_name) for ceb_file_name in [
+    'stats_CEB_sub_queries_truecard.txt'
 ])
 
 

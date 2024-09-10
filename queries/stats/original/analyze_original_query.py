@@ -48,11 +48,13 @@ print("Running queries: ", os.listdir(query_directory))
 evaluator = PostgresQueryEvaluator(
     db_config, 
     query_directory,                                   
-    debug_mode=False, 
+    debug_mode=False,
+    timeout_mil=0,
+    max_runs=1,
 )
 
 evaluator.run(
-    query_log_file = f'postgres-stats-original-config.json',
+    query_log_file = f'postgres-stats-non-parallel.json',
     rerun_finished=False,
     sample_size=None
 )

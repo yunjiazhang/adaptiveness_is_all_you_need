@@ -24,7 +24,9 @@ class PerQueryTimeoutController(object):
                  no_op=False,
                  relax_timeout_factor=None,
                  relax_timeout_on_n_timeout_iters=None,
-                 initial_timeout_ms=None):
+                 initial_timeout_ms=None,
+                 use_aggressive_timeout=False,
+                 min_timeout_ms=5000):
         self.timeout_slack = timeout_slack
         self.no_op = no_op
         self.relax_timeout_factor = relax_timeout_factor
@@ -36,8 +38,15 @@ class PerQueryTimeoutController(object):
         self.curr_iter_has_timeouts = False
         self.num_consecutive_timeout_iters = 0
         self.iter_executed = False
+        self.use_aggressive_timeout = use_aggressive_timeout
+        self.aggressive_timeout_ms_dict = None
+        self.min_timeout_ms = min_timeout_ms
+        self.default_max_timeout_ms = 1200000 # 20min = 1200s = 1200000ms
 
     def GetTimeout(self, query_node):
+        if self.use_aggressive_timeout:
+            return self.GetAggresiveTimeout(query_node)
+        
         if self.no_op:
             return None
         if self.iter_timeout_ms is None:
@@ -45,6 +54,31 @@ class PerQueryTimeoutController(object):
         # If all queries in the previous iteration time out, iter_timeout_ms
         # would be -1e30; guard against this by returning 0 (no timeout).
         return max(self.iter_timeout_ms, 0)
+
+    def InitAggressiveTimeout(self, aggressive_timeout_ms_file):
+        """Initialize timeout for each query."""
+        """In the dictionary, the key is the query name and the value is the PG execution time in ms."""
+        import json
+        self.aggressive_timeout_ms_dict = json.load(open(aggressive_timeout_ms_file))
+        print("Aggressive timeout dict: ", self.aggressive_timeout_ms_dict)
+    
+    def GetAggresiveTimeout(self, query_node):
+        query_name = query_node.info['query_name'].lstrip('t') + '.sql' 
+        print("Query name: ", query_name)
+        aggressive_timeout_ms = self.aggressive_timeout_ms_dict.get(query_name)
+        if aggressive_timeout_ms is None:
+            print("Aggressive timeout not found for query " + query_name)
+            print("Using default max timeout: ", self.default_max_timeout_ms)
+            return self.default_max_timeout_ms
+        aggressive_timeout_ms *= self.timeout_slack
+        print("Aggressive timeout for query ", query_name, " is ", aggressive_timeout_ms)
+        if self.min_timeout_ms >= aggressive_timeout_ms:
+            print("\t...but this aggressive timeout is too small, using min_timeout_ms: ", 
+                  self.min_timeout_ms)
+            return self.min_timeout_ms
+        else:
+            print("\t...and it is large enough, using it as the timeout")
+            return aggressive_timeout_ms
 
     def RecordQueryExecution(self, query_node, latency_ms):
         del query_node
